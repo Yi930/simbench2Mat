@@ -17,3 +17,7 @@ buses = net.bus
 geoData = [net.bus_geodata['x'].tolist(), net.bus_geodata['y'].tolist()]
 loads = net.load.bus.tolist()
 gens = net.gen.bus.tolist()
+
+pp.runpp(net)
+p_mw = net.res_bus.p_mw.to_list()
+q_mvar = net.res_bus.q_mvar.tolist()

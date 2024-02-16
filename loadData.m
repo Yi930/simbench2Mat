@@ -1,9 +1,6 @@
 tmp = pyenv(Version="/Users/bing/anaconda3/bin/python", ExecutionMode="OutOfProcess");
-linesTmp = pyrunfile("loadData.py", "lines");
-loadsTmp = pyrunfile("loadData.py", "loads");
-busesTmp = pyrunfile("loadData.py", "buses");
-gensTmp = pyrunfile("loadData.py", "gens");
-geoDataTmp = pyrunfile("loadData.py", "geoData");
+[linesTmp, loadsTmp, busesTmp, gensTmp, geoDataTmp, p_mwTmp, q_mvarTmp] = pyrunfile("loadData.py", ...
+    ["lines", "loads", "buses", "gens", "geoData", "p_mw", "q_mvar"]);
 % pyrunfile("loadData.py");
 % Read the line data
 line1 = cell(linesTmp(1));
@@ -17,6 +14,10 @@ loads = double(loadsTmp(1,:));
 
 % Read the gens' bus position
 gens = double(gensTmp(1,:));
+
+% Read the bus p, q
+p_mw = double(p_mwTmp(1,:));
+q_mvar = double(q_mvarTmp(1,:));
 
 % Read the geo data
 geox = cell(geoDataTmp(1));
@@ -73,3 +74,32 @@ gr = graph(Array);
 h = plot(gr, 'XData', geox, 'YData', geoy);
 highlight(h, loadCorrespondingIndex, 'NodeColor', 'r');
 highlight(h, genCorrespondingIndex,'Marker', 'pentagram', 'MarkerSize', 5, 'NodeColor', 'blue');
+
+figure();
+
+% 生成规则网格
+[Xq,Yq] = meshgrid(min(geox):0.1:max(geox), min(geoy):0.1:max(geoy));
+
+% 插值
+Vq = griddata(geox,geoy,q_mvar,Xq,Yq,'cubic');
+
+% 绘制热图
+imagesc(min(geox):0.1:max(geox), min(geoy):0.1:max(geoy), Vq);
+colorbar; % 添加颜色条
+axis xy; % 确保坐标轴方向正确
+xlabel('X');
+ylabel('Y');
+title('Reactive Power Heatmap');
+
+figure();
+
+% 插值
+Vq = griddata(geox,geoy,p_mw,Xq,Yq,'cubic');
+
+% 绘制热图
+imagesc(min(geox):0.1:max(geox), min(geoy):0.1:max(geoy), Vq);
+colorbar; % 添加颜色条
+axis xy; % 确保坐标轴方向正确
+xlabel('X');
+ylabel('Y');
+title('Active Power Heatmap');
